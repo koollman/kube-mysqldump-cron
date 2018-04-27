@@ -3,7 +3,7 @@ kind: ScheduledJob
 metadata:
   name: mysqldump
 spec:
-  schedule: 0 13 * * *
+  schedule: 30 13 * * *
   jobTemplate:
     spec:
       template:
