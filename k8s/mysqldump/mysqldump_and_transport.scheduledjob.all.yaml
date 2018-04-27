@@ -1,0 +1,60 @@
+apiVersion: batch/v2alpha1
+kind: ScheduledJob
+metadata:
+  name: mysqldump
+spec:
+  schedule: 0 13 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            role: mysqldump
+          containers:
+          - name: mysqldump
+            image: koollman/mysqldump
+            env:
+              - name: ALL_DATABASES
+                valueFrom:
+                  configMapKeyRef:
+                    name: mysqldump
+                    key: all_databases
+              - name: DB_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: mysqldump
+                    key: dbhost
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: mysqldump
+                    key: dbuser
+              - name: DB_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: mysqldump
+                    key: dbpass
+              - name: TARGET_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: transporter
+                    key: target.host
+              - name: TARGET_PATH
+                valueFrom:
+                  configMapKeyRef:
+                    name: transporter
+                    key: target.path
+              - name: LINUX_USER
+                valueFrom:
+                  configMapKeyRef:
+                    name: transporter
+                    key: linux.user
+            volumeMounts:
+              - mountPath: /mysqldump
+                name: mysqldump
+              - mountPath: /root/.ssh/private
+                name: transporter-key
+          volumes:
+            - name: mysqldump
+              emptyDir: {}
+          restartPolicy: OnFailure
