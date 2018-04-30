@@ -1,5 +1,5 @@
-apiVersion: batch/v2alpha1
-kind: ScheduledJob
+apiVersion: batch/v1beta1
+kind: CronJob
 metadata:
   name: mysqldump
 spec:
@@ -8,8 +8,6 @@ spec:
     spec:
       template:
         spec:
-          nodeSelector:
-            role: mysqldump
           containers:
           - name: mysqldump
             image: koollman/mysqldump
@@ -19,11 +17,11 @@ spec:
                   configMapKeyRef:
                     name: mysqldump
                     key: all_databases
-              - name: DB_HOST
+              - name: DB_HOSTS
                 valueFrom:
                   configMapKeyRef:
                     name: mysqldump
-                    key: dbhost
+                    key: dbhosts
               - name: DB_USER
                 valueFrom:
                   secretKeyRef:
@@ -57,4 +55,8 @@ spec:
           volumes:
             - name: mysqldump
               emptyDir: {}
+            - name: transporter-key
+              secret:
+                secretName: transporter-key
+                defaultMode: 256
           restartPolicy: OnFailure
